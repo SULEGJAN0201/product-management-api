@@ -67,9 +67,18 @@ namespace ProductManagment.Infrastructure.Repositories
             command.Parameters.AddWithValue("@Name", product.Name);
             command.Parameters.AddWithValue("@Price", product.Price);
 
+            // Add output parameter for ProductId
+            SqlParameter outputParameter = new SqlParameter();
+            outputParameter.ParameterName = "@ProductId";
+            outputParameter.SqlDbType = SqlDbType.Int;
+            outputParameter.Direction = ParameterDirection.Output;
+            command.Parameters.Add(outputParameter);
+
             await connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            return Convert.ToInt32(result);
+            await command.ExecuteNonQueryAsync();
+
+            int productId = (int)command.Parameters["@ProductId"].Value;
+            return productId;
         }
 
         public async Task<bool> UpdateProductAsync(Product product)
